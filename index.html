@@ -1,1 +1,86 @@
-My Page
+<html>
+<body>
+<h1><a href="http://schacon.github.io/git/gitattributes.html" target="_blank">gitattributes(5) Manual Page</a></h1>
+<p>1.gitattributes是什么？</p>
+<p>gitattributes用于定义每个路径的属性。</p>
+<p>其语法是：pattern attr1 attr2 ...</p>
+<p>2.什么叫做定义每个路径的属性？</p>
+<p>比如:（pattern attr1）&nbsp; *.txt text</p>
+<p>*.txt就是一个pattern，用来匹配所有的.txt文件，匹配到的各个文件就有各自的路径。</p>
+<p>比如text属性，text就是一个属性名，它的值是true。</p>
+<p>3.pattern后面可以接多个属性，又是怎么给属性赋值的呢？</p>
+<p>每种属性可能有Set，Unset，Set to a value，Unspecified几种状态。</p>
+<p>Set状态就是 其值是true，单独写出这个属性名就表示其值是true。</p>
+<p>Unset状态就是 其值是false，属性名加上-就表示其值是false。</p>
+<p>Set to a value状态就是 属性名=值，值就是一个字符串</p>
+<p>Unspecified状态 就是pattern没有匹配到路径，以及没有说明路径有还是没有属性。</p>
+<p>举个例子，text属性</p>
+<p>Set状态 text</p>
+<p>Unset状态 -text</p>
+<p>Set to a value状态 text=auto</p>
+<p>4.在哪些地方可以写gitattributes呢？</p>
+<p>①. $GIT_DIR/info/attributes 文件中 （优先级高）</p>
+<p>②. 各个文件路径所在目录下的.gitattributes文件，以及所有父目录下的.gitattributes文件（优先级中，距离越远优先级越低）</p>
+<p>③. 全局及系统范围下的文件（优先级低）</p>
+<p>5.各个位置的gitattributes分别用于什么目的呢？</p>
+<p>如果只想影响一个用户的某一个repository，就放在$GIT_DIR/info/attributes中。因为这个文件是repository所独有的，是不会放到版本控制中的，因而别的repository访问不到。</p>
+<p>对于所有用户都感兴趣的gitattributes就放到.gitattributes文件中。因为这些文件会放到版本控制中，分发给其他的repository。</p>
+<p>对于影响一个用户的所有repository的属性就放到由core.attributesfile配置选项指定的文件中。</p>
+<p>针对一个系统中的所有用户的属性应该放到$(prefix)/etc/gitattributes文件中。</p>
+<p>6.gitattributes中的属性对Git有什么影响呢？</p>
+<p><strong>对于迁入或迁出的影响</strong>：</p>
+<p>迁入就是将working tree中你准备的内容保存到repository中，比如git add，git commit命令。</p>
+<p>迁出就是将保存在repository中的内容拷贝到working tree中，比如git checkout，git merge命令。</p>
+<p><strong>text属性</strong></p>
+<p>给一个路径设置<strong>text属性</strong>可以启用和控制end-of-line的规范化。当一个文本文件被规范化时，在<strong>repository</strong>中它的行结束符会被转换为LF。</p>
+<p>要控制在<strong>working directory</strong>中使用的行结束符，就要为单个文件使用<strong>eol属性</strong>以及为所有文本文件使用<strong>core.eol配置</strong>。</p>
+<p>①.Set状态 在路径中设置text属性为Set状态会启用end-of-line的规范化并将这个路径标记为文本文件。不需要猜测内容类型，End-of-line转换就会发生。</p>
+<p>②.Unset状态&nbsp;在路径中设置text属性为Unset状态就是告诉git在迁入迁出时不尝试任何的end-of-line转换。</p>
+<p>③.Set to string value "auto" 状态&nbsp;设置text属性为&ldquo;auto&rdquo;状态时，&nbsp;路径就标记为自动end-of-line规范化。如果git确定内容是文本，在迁入时，行结束符就被规范化为LF。</p>
+<p>④.Unspecified状态 如果text属性没有被指定，git使用core.autocrlf配置变量来决定这个文件是否应该被转换。</p>
+<p>任何其他值都会使得git的行为和text属性设置为Unspecified状态时一样。</p>
+<p><strong>eol属性</strong></p>
+<p>这个属性用于设定在working directory中使用的行结束符。它会动用end-of-line规范化而不做任何的内容检查，高效地设置text属性。</p>
+<p>①.Set to string value "crlf" 状态&nbsp; 这个设置会强制git在<strong>迁入</strong>文件时规范化行结束符，并且当文件<strong>迁出</strong>时，将它们转为CRLF。</p>
+<p>②.Set to string value "lf" 状态&nbsp;&nbsp;这个设置会强制git在<strong>迁入</strong>文件时规范化行结束符为LF，并且当文件<strong>迁出</strong>时，阻止转换为CRLF。</p>
+<p>&nbsp;</p>
+<p><strong>crlf属性</strong>的向后兼容性</p>
+<p>为了向后兼容，crlf属性按如下方式解读：</p>
+<pre><tt>crlf            text
+-crlf           -text
+crlf=input      eol=lf</tt></pre>
+<p><strong>End-of-line转换</strong></p>
+<p>虽然git通常只保留文件内容，但是它可以被配置来规范化在<strong>repository</strong>中的行结束符为<strong>LF</strong>，可以选择在文件<strong>迁出</strong>时将它们转换为<strong>CRLF</strong>。</p>
+<p>这是一个让git规范化.txt，.vcproj，.sh文件的例子，确保在working directory中，.vcproj文件有CRLF，.sh文件有LF，并且不管.jpg文件的内容阻止其被规范化。</p>
+<pre><tt>*.txt           text
+*.vcproj        eol=crlf
+*.sh            eol=lf
+*.jpg           -text</tt></pre>
+<p>其他的源代码管理系统规范化在repository中的所有文本文件，并且在git中有两种启用类似的自动规范化的方式。</p>
+<p>如果你只是想在你的working directory中用CRLF行结束符而不管你的repository，你可以设置config变量&ldquo;core.autocrlf&rdquo;而不用改变任何属性。</p>
+<p>[core]</p>
+<p>&nbsp; &nbsp; autocrlf = true</p>
+<p>这不会强制所有文本文件的规范化，但是确实会保证你引入到repository中的文本文件的行结束符，在被加入时规范化为LF，确保在repository中已经规范化的文件保持规范化。</p>
+<p>如果你想和强制end-of-line规范化的源代码管理系统进行互操作，或你只是想要在你的repository中的所有文本文件被规范化，你应当为所有文件设置text属性为&ldquo;auto&rdquo;。</p>
+<p>*&nbsp; &nbsp;text=auto</p>
+<p>这会保证所有git认为是文本的文件在repository中规范化（LF）。core.eol配置变量控制在你的working directory中git会使用的行结束符；默认是使用你的平台的本地行结束符。如果core.autocrlf设置了就是CRLF。</p>
+<p><strong>注意</strong></p>
+<p>当在一个既存的repository中启用text=auto时，任何包含CRLFs的文本文件应当被规范化。如果它们没有被规范化的话，在下一次某个人变更了它们的话，会造成不幸的错误认定。</p>
+<p><span id="result_box" class="short_text" lang="zh-CN">从一个干净的工作目录开始：</span></p>
+<pre><tt>$ echo "* text=auto" &gt;&gt;.gitattributes
+$ rm .git/index     # Remove the index to force git to
+$ git reset         # re-scan the working directory
+$ git status        # Show files that will be normalized
+$ git add -u
+$ git add .gitattributes
+$ git commit -m "Introduce end-of-line normalization"</tt></pre>
+<p>对于任何不应该被规范化的文件出现在git status中的话，在运行git add -u之前设置text属性为unset状态。</p>
+<pre><tt>manual.pdf      -text</tt></pre>
+<p><span id="result_box" lang="zh-CN">相反，git未检测到的文本文件可以手动启用规范化。</span></p>
+<pre><tt>weirdchars.txt  text</tt></pre>
+<p>如果core.safecrlf被设为&ldquo;true&rdquo;或&ldquo;warn&rdquo;，git会验证这个转换对于当前的core.autocrlf设置是否是可逆的。对于&ldquo;true&rdquo;，<span id="result_box" class="short_text" lang="zh-CN">git拒绝不可逆转的转换。对于&ldquo;warn&rdquo;，git只是打印一个警告，但接受不可逆的转换。</span><br /><span id="result_box" lang="zh-CN">安全触发器阻止对work tree中的文件执行这种转换，但有一些例外。 即使&hellip;</span><br />・ git add・・・</p>
+<p>・ git apply・・・</p>
+<p>・ git diff ・・・</p>
+<p>&nbsp;</p>
+</body>
+</html>
